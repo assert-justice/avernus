@@ -120,8 +120,8 @@ void Engine::loop()
         graphics.drawBegin();
         // if(!vm.draw()) return false;
         // if(draw!=nullptr) draw(this);
-        app->draw();
         graphics.drawUiBegin();
+        app->draw();
         // if(!vm.drawUi()) return false;
         graphics.drawEnd();
         if(graphics.shouldClose()) isRunning = false;

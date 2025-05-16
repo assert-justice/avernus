@@ -57,4 +57,4 @@ set( AVE-SRC ${AVE-ENGINE} ${AVE-UTILS} ${AVE-EXTERN} ${AVE-APP} src/main.cpp )
 
 add_executable( avernus ${AVE-SRC} ${GLAD_GL} )
 
-target_link_libraries( avernus ${OPENGL_LIBRARIES} glfw glm miniaudio flecs )
+target_link_libraries( avernus ${OPENGL_LIBRARIES} glfw glm miniaudio flecs::flecs_static )
