@@ -11,6 +11,8 @@ class Game: App{
     void draw();
     private:
     Engine engine;
-    flecs::world world;
+    flecs::world ecs;
+    flecs::system move_sys;
+    flecs::system draw_sys;
     int jumpSpr;
 };
