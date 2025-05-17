@@ -16,6 +16,7 @@ class Game: App{
     flecs::system move_sys;
     flecs::system draw_sys;
     int jumpSpr;
+    int runSpr;
     Input input;
     float speed = 30;
 };

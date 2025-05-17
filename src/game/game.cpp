@@ -10,6 +10,21 @@ struct Velocity {
     double y;
 };
 
+struct Sprite{
+    int id;
+    int width;
+    int height;
+    int frames;
+    double frameDuration;
+    bool loops;
+};
+
+struct SprAnimated{
+    int frame;
+    bool hFlipped;
+    double frameTime;
+};
+
 Game::Game()
 {
     engine.app = this;
@@ -19,6 +34,7 @@ Game::Game()
 void Game::init() {
     input.setWindow(engine.graphics.getWindow());
     jumpSpr = engine.graphics.loadImage("sprites/Jump (32x32).png");
+    runSpr = engine.graphics.loadImage("sprites/Run (32x32).png");
     move_sys = ecs.system<Position, Velocity>()
         .each([this](flecs::iter& it, size_t, Position& p, Velocity& v) {
             auto move = input.move();
@@ -28,13 +44,24 @@ void Game::init() {
             p.x += v.x * it.delta_time();
             p.y += v.y * it.delta_time();
         });
-    draw_sys = ecs.system<Position>()
-        .each([this](flecs::iter& it, size_t, Position& p){
-            engine.graphics.drawImage(jumpSpr, p.x, p.y);
+    draw_sys = ecs.system<Position, Sprite, SprAnimated>()
+        .each([this](flecs::iter& it, size_t, Position& p, Sprite& s, SprAnimated& a){
+            a.frameTime += it.delta_time();
+            if(a.frameTime > s.frameDuration){
+                a.frameTime = 0;
+                a.frame += 1;
+                if(a.frame >= s.frames){
+                    if(s.loops) a.frame = 0;
+                    else a.frame = s.frames-1;
+                }
+            }
+            engine.graphics.drawImageExt(s.id, p.x, p.y, s.width*10, s.height*10, s.width * a.frame, 0, s.width, s.height, 0, 0, 0);
         });
     auto bob = ecs.entity("Bob")
         .set(Position{0, 0})
-        .set(Velocity{0,0});
+        .set(Velocity{0,0})
+        .set(Sprite{runSpr, 32, 32, 12, 1.0/20, true})
+        .set(SprAnimated{0, false, 0});
 }
 void Game::update(){
     input.poll();
@@ -46,4 +73,5 @@ void Game::draw(){
     // engine.graphics.drawImage(jumpSpr, 0, 0);
     double ft = engine.getFrameTime();
     draw_sys.run(ft);
+    // printf("ft %f\n", ft);
 }
