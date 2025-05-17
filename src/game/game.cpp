@@ -35,10 +35,12 @@ void Game::init() {
     input.setWindow(engine.graphics.getWindow());
     jumpSpr = engine.graphics.loadImage("sprites/Jump (32x32).png");
     runSpr = engine.graphics.loadImage("sprites/Run (32x32).png");
-    move_sys = ecs.system<Position, Velocity>()
-        .each([this](flecs::iter& it, size_t, Position& p, Velocity& v) {
+    move_sys = ecs.system<Position, Velocity, SprAnimated>()
+        .each([this](flecs::iter& it, size_t, Position& p, Velocity& v, SprAnimated& a) {
             auto move = input.move();
             move *= speed;
+            if(move.x > 0) a.hFlipped = false;
+            if(move.x < 0) a.hFlipped = true;
             v.x = move.x;
             v.y = move.y;
             p.x += v.x * it.delta_time();
@@ -55,13 +57,19 @@ void Game::init() {
                     else a.frame = s.frames-1;
                 }
             }
-            engine.graphics.drawImageExt(s.id, p.x, p.y, s.width*10, s.height*10, s.width * a.frame, 0, s.width, s.height, 0, 0, 0);
+            float sx = s.width * a.frame;
+            float sw = s.width;
+            if(a.hFlipped){
+                sx += sw;
+                sw = -sw;
+            }
+            engine.graphics.drawImageExt(s.id, p.x, p.y, s.width*10, s.height*10, sx, 0, sw, s.height, 0, 0, 0);
         });
     auto bob = ecs.entity("Bob")
         .set(Position{0, 0})
         .set(Velocity{0,0})
         .set(Sprite{runSpr, 32, 32, 12, 1.0/20, true})
-        .set(SprAnimated{0, false, 0});
+        .set(SprAnimated{0, true, 0});
 }
 void Game::update(){
     input.poll();

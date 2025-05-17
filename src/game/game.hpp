@@ -18,5 +18,5 @@ class Game: App{
     int jumpSpr;
     int runSpr;
     Input input;
-    float speed = 30;
+    float speed = 300;
 };
