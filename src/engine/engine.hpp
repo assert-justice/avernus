@@ -19,6 +19,7 @@ class Engine{
     void setTickrate(double tr);
     double getDeltaTime();
     double getFrameTime();
+    void quit();
     // Modules
     Graphics graphics;
     private:

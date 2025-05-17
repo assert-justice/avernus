@@ -17,9 +17,14 @@ Game::Game()
 }
 
 void Game::init() {
+    input.setWindow(engine.graphics.getWindow());
     jumpSpr = engine.graphics.loadImage("sprites/Jump (32x32).png");
     move_sys = ecs.system<Position, Velocity>()
-        .each([](flecs::iter& it, size_t, Position& p, Velocity& v) {
+        .each([this](flecs::iter& it, size_t, Position& p, Velocity& v) {
+            auto move = input.move();
+            move *= speed;
+            v.x = move.x;
+            v.y = move.y;
             p.x += v.x * it.delta_time();
             p.y += v.y * it.delta_time();
         });
@@ -29,9 +34,11 @@ void Game::init() {
         });
     auto bob = ecs.entity("Bob")
         .set(Position{0, 0})
-        .set(Velocity{0,1});
+        .set(Velocity{0,0});
 }
 void Game::update(){
+    input.poll();
+    if(input.isMenuPressed()) engine.quit();
     double dt = engine.getDeltaTime();
     move_sys.run(dt);
 }

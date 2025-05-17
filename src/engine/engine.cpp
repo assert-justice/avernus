@@ -54,6 +54,11 @@ double Engine::getFrameTime()
     return ft;
 }
 
+void Engine::quit()
+{
+    isRunning = false;
+}
+
 void Engine::addModule(Module *mod)
 {
     modules.push_back(mod);

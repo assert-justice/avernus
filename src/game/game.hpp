@@ -2,6 +2,7 @@
 #include "engine/app.hpp"
 #include "engine/engine.hpp"
 #include "flecs.h"
+#include "input.hpp"
 
 class Game: App{
     public:
@@ -15,4 +16,6 @@ class Game: App{
     flecs::system move_sys;
     flecs::system draw_sys;
     int jumpSpr;
+    Input input;
+    float speed = 30;
 };

@@ -50,6 +50,7 @@ set( AVE-EXTERN
 
 set (AVE-APP
     src/game/game.cpp
+    src/game/input.cpp
 )
 
 
