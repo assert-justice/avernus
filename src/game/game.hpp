@@ -13,10 +13,11 @@ class Game: App{
     private:
     Engine engine;
     flecs::world ecs;
-    flecs::system move_sys;
-    flecs::system draw_sys;
+    std::vector<flecs::system> updateSystems;
+    std::vector<flecs::system> drawSystems;
     int jumpSpr;
     int runSpr;
     Input input;
     float speed = 300;
+    void initSystems();
 };

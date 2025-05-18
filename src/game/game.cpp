@@ -35,18 +35,47 @@ void Game::init() {
     input.setWindow(engine.graphics.getWindow());
     jumpSpr = engine.graphics.loadImage("sprites/Jump (32x32).png");
     runSpr = engine.graphics.loadImage("sprites/Run (32x32).png");
-    move_sys = ecs.system<Position, Velocity, SprAnimated>()
-        .each([this](flecs::iter& it, size_t, Position& p, Velocity& v, SprAnimated& a) {
+    initSystems();
+    auto bob = ecs.entity("Bob")
+        .set(Position{0, 0})
+        .set(Velocity{0,0})
+        .set(Sprite{runSpr, 32, 32, 12, 1.0/20, true})
+        .set(SprAnimated{0, true, 0});
+}
+void Game::update(){
+    input.poll();
+    if(input.isMenuPressed()) engine.quit();
+    double dt = engine.getDeltaTime();
+    for(auto sys : updateSystems){
+        sys.run(dt);
+    }
+}
+void Game::draw(){
+    double ft = engine.getFrameTime();
+    for(auto sys : drawSystems){
+        sys.run(ft);
+    }
+}
+
+void Game::initSystems()
+{
+    auto playerSys = ecs.system<Velocity, SprAnimated>()
+        .each([this](flecs::iter& it, size_t, Velocity& v, SprAnimated& a){
             auto move = input.move();
             move *= speed;
             if(move.x > 0) a.hFlipped = false;
             if(move.x < 0) a.hFlipped = true;
             v.x = move.x;
             v.y = move.y;
+        });
+    auto moveSys = ecs.system<Position, Velocity>()
+        .each([](flecs::iter& it, size_t, Position& p, Velocity& v) {
             p.x += v.x * it.delta_time();
             p.y += v.y * it.delta_time();
         });
-    draw_sys = ecs.system<Position, Sprite, SprAnimated>()
+    updateSystems.push_back(playerSys);
+    updateSystems.push_back(moveSys);
+    auto drawSys = ecs.system<Position, Sprite, SprAnimated>()
         .each([this](flecs::iter& it, size_t, Position& p, Sprite& s, SprAnimated& a){
             a.frameTime += it.delta_time();
             if(a.frameTime > s.frameDuration){
@@ -65,21 +94,5 @@ void Game::init() {
             }
             engine.graphics.drawImageExt(s.id, p.x, p.y, s.width*10, s.height*10, sx, 0, sw, s.height, 0, 0, 0);
         });
-    auto bob = ecs.entity("Bob")
-        .set(Position{0, 0})
-        .set(Velocity{0,0})
-        .set(Sprite{runSpr, 32, 32, 12, 1.0/20, true})
-        .set(SprAnimated{0, true, 0});
-}
-void Game::update(){
-    input.poll();
-    if(input.isMenuPressed()) engine.quit();
-    double dt = engine.getDeltaTime();
-    move_sys.run(dt);
-}
-void Game::draw(){
-    // engine.graphics.drawImage(jumpSpr, 0, 0);
-    double ft = engine.getFrameTime();
-    draw_sys.run(ft);
-    // printf("ft %f\n", ft);
+    drawSystems.push_back(drawSys);
 }
